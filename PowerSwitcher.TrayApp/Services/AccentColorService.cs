@@ -29,8 +29,21 @@ namespace PowerSwitcher.TrayApp.Services
             internal static extern IntPtr GetImmersiveColorNamedTypeByIndex(uint dwIndex);
         }
 
+        public static bool HasModernUI
+        {
+            get
+            {
+                return Environment.OSVersion.Version.Major >= 6 && Environment.OSVersion.Version.Minor >= 2;
+            }
+        }
+
         public static Color GetColorByTypeName(string name)
         {
+            if (!HasModernUI)
+            {
+                throw new InvalidOperationException("The platform does not support this.");
+            }
+
             var colorSet = Interop.GetImmersiveUserColorSetPreference(false, false);
             var colorType = Interop.GetImmersiveColorTypeFromName(name);
 

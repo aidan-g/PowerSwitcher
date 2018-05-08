@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System;
 
 namespace PowerSwitcher.TrayApp.Services
 {
@@ -7,14 +8,20 @@ namespace PowerSwitcher.TrayApp.Services
     ////
     public static class UserSystemPreferencesService
     {
+        const string KEY_NAME = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+
         public static bool IsTransparencyEnabled
         {
             get
             {
-                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                return WithSubKey(RegistryHive.CurrentUser, RegistryView.Registry64, KEY_NAME, key =>
                 {
-                    return (int)baseKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize").GetValue("EnableTransparency", 0) > 0;
-                }
+                    if (key == null)
+                    {
+                        return false;
+                    }
+                    return (int)key.GetValue("EnableTransparency", 0) > 0;
+                });
             }
         }
 
@@ -22,9 +29,24 @@ namespace PowerSwitcher.TrayApp.Services
         {
             get
             {
-                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                return WithSubKey(RegistryHive.CurrentUser, RegistryView.Registry64, KEY_NAME, key =>
+                 {
+                     if (key == null)
+                     {
+                         return false;
+                     }
+                     return (int)key.GetValue("ColorPrevalence", 0) > 0;
+                 });
+            }
+        }
+
+        private static T WithSubKey<T>(RegistryHive hKey, RegistryView view, string name, Func<RegistryKey, T> func)
+        {
+            using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+            {
+                using (var subKey = baseKey.OpenSubKey(name))
                 {
-                    return (int)baseKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize").GetValue("ColorPrevalence", 0) > 0;
+                    return func(subKey);
                 }
             }
         }

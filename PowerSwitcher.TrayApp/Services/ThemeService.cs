@@ -15,9 +15,14 @@ namespace PowerSwitcher.TrayApp.Services
 
         public static void UpdateThemeResources(ResourceDictionary dictionary)
         {
+            if (!AccentColorService.HasModernUI)
+            {
+                return;
+            }
+
             dictionary["WindowBackground"] = new SolidColorBrush(GetWindowBackgroundColor());
 
-            ReplaceBrush(dictionary, "WindowForeground", "ImmersiveApplicationTextDarkTheme"); 
+            ReplaceBrush(dictionary, "WindowForeground", "ImmersiveApplicationTextDarkTheme");
             ReplaceBrushWithOpacity(dictionary, "SelectedItemBackground", "ImmersiveSystemAccent", 0.5);
             ReplaceBrushWithOpacity(dictionary, "MouseOverSelectedItemBackground", "ImmersiveSystemAccent", 0.75);
             ReplaceBrushWithOpacity(dictionary, "MouseOverItemBackground", "ImmersiveControlLightSelectHighlightSelectedHover", 0.3);
